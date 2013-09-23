@@ -45,7 +45,7 @@ class Croppa {
 		
 		// Break the path apart and put back together again
 		$parts = pathinfo($src);
-		$url = $this->config['host'].$parts['dirname'].'/'.$parts['filename'].$suffix;
+		$url = $this->config['host'].$parts['dirname'].'/thumbnails/'.$parts['filename'].$suffix;
 		if (!empty($parts['extension'])) $url .= '.'.$parts['extension'];
 		return $url;
 	}
@@ -60,6 +60,7 @@ class Croppa {
 	 */
 	public function generate($url) {
 		
+
 		// Make sure this file doesn't exist.  There's no reason it should if the 404
 		// capturing is working right, but just in case
 		if ($src = $this->checkForFile($url)) {
@@ -84,10 +85,12 @@ class Croppa {
 		if (!($src = $this->checkForFile($path))) throw new Exception('Croppa: Referenced file missing');
 		
 		// Make the destination the same path
-		$dst = dirname($src).'/'.basename($url);
-		
+		$dst = dirname($src).'/thumbnails/'.basename($url);
+
 		// Make sure destination is writeable
-		if (!is_writable(dirname($dst))) throw new Exception('Croppa: Destination is not writeable');
+		if (!is_writable(dirname($dst))) {
+			\File::makeDirectory(dirname($dst));
+		}
 		
 		// If width and height are both wildcarded, just copy the file and be done with it
 		if ($width == '_' && $height == '_') {
@@ -227,12 +230,15 @@ class Croppa {
 
 		// Loop through all the directories files may be uploaded to
 		$src_dirs = $this->config['src_dirs'];
+
 		foreach($src_dirs as $dir) {
 			
 			// Check that directory exists
 			if (!is_dir($dir)) continue;
 			if (substr($dir, -1, 1) != '/') $dir .= '/';
-			
+
+			$path = str_replace('/thumbnails', '', $path);
+	
 			// Look for the image in the directory
 			$src = realpath($dir.$path);
 			if (is_file($src) && getimagesize($src) !== false) {
