@@ -90,8 +90,10 @@ class Croppa {
 		// Make sure destination is writeable
 		if (!is_writable(dirname($dst))) {
 			\File::makeDirectory(dirname($dst));
+			\File::put(dirname($dst) . '/.gitkeep', '');
+			\File::put(dirname($dst) . '/.gitignore', "*\n!.gitignore\n!.gitkeep");
 		}
-		
+				
 		// If width and height are both wildcarded, just copy the file and be done with it
 		if ($width == '_' && $height == '_') {
 			copy($src, $dst);
