@@ -87,8 +87,11 @@ class Croppa {
 		// Make the destination the same path
 		$dst = dirname($src).'/thumbnails/'.basename($url);
 
-		// Make sure destination is writeable
-		if (!is_writable(dirname($dst))) {
+		if (\File::isDirectory(dirname($dst)) && !is_writable(dirname($dst)))
+		{
+			@chmod(dirname($dst), 0777);
+		} 
+		elseif (!is_writable(dirname($dst))) {
 			\File::makeDirectory(dirname($dst));
 			\File::put(dirname($dst) . '/.gitkeep', '');
 			\File::put(dirname($dst) . '/.gitignore', "*\n!.gitignore\n!.gitkeep");
